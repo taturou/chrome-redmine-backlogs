@@ -11,7 +11,7 @@ module.exports = {
     tab: resolve('./tab'),
     options: resolve('./options'),
     content: resolve('./content'),
-    background: resolve('./background'),
+    background: resolve('./background')
   },
   output: {
     path: path.join(__dirname, '..', 'dist'),

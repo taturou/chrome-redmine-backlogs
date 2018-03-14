@@ -23,7 +23,7 @@ module.exports = {
     'storage'
   ],
   browser_action: {
-    default_title: 'title',
+    default_title: 'PJP',
     default_popup: 'pages/popup.html'
   },
   background: {
