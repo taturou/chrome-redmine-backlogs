@@ -50,6 +50,7 @@ function createIdCopyButton () {
           value="#${taskid} #${featureid}"
           style="display:inline-block;
                 margin:0;
+                margin-right: 2px;
                 font-size:inherit;
                 padding:0px;
                 font-weight:normal;
@@ -61,7 +62,7 @@ function createIdCopyButton () {
                 user-select:none;
                 vertical-align:bottom;"
         >
-        #️⃣
+        #
         </button>`
       $(elem).find('.prevent_edit').before(html)
     } catch (error) {
@@ -72,8 +73,8 @@ function createIdCopyButton () {
 
 // ボタンが押されたら、クリップボードにコピー
 $(document).on('click', '#copyIdButton', (e) => {
-  // e.target.value // ノーマル
-  let string = e.target.parentElement.parentElement.value // 絵文字
+  let string = e.target.value // ノーマル
+  // let string = e.target.parentElement.parentElement.value // 絵文字
   execCopy(string)
   console.log(string)
 })
@@ -107,6 +108,7 @@ function createIdTitleButton () {
           value="${storyname}: ${taskname}"
           style="display:inline-block;
                 margin:0;
+                margin-left: 0.5em;
                 font-size:inherit;
                 padding:0px;
                 font-weight:normal;
@@ -117,9 +119,9 @@ function createIdTitleButton () {
                 cursor:pointer;
                 user-select:none;
                 vertical-align:bottom;">
-          📝
+          ■
           </button>`
-      $(elem).find('.prevent_edit').before(html)
+      $(elem).find('.prevent_edit').after(html)
     } catch (error) {
       console.log(error)
     }
@@ -128,8 +130,8 @@ function createIdTitleButton () {
 
 // ボタンが押されたら、クリップボードにコピー
 $(document).on('click', '#copyTitleButton', (e) => {
-  // e.target.value // ノーマル
-  let string = e.target.parentElement.parentElement.value // 絵文字
+  let string = e.target.value // ノーマル
+  // let string = e.target.parentElement.parentElement.value // 絵文字
   execCopy(string)
   console.log(string)
 })
@@ -155,9 +157,9 @@ function createOpenChildIdList () {
           target="_blank"
           href="/issues?fv%5Bparent_id%5D%5B%5D=${featureid}&f%5B%5D=&c%5B%5D=status&c%5B%5D=tracker&c%5B%5D=cf_271&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=total_estimated_hours&c%5B%5D=total_spent_hours&group_by=assigned_to&t%5B%5D=estimated_hours&t%5B%5D=spent_hours&t%5B%5D="
         >
-        📇
+        ●
         </a>`
-      $(story).find('a').after(html)
+      $(story).find('a').before(html)
     } catch (error) {
       console.log(error)
     }
