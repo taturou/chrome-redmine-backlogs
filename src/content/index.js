@@ -49,8 +49,8 @@ function parseKanban (callback) {
       $(featureHeaderBox).attr('id', `${idPrefix}story_header_box-${featureid}`)
 
       // Featureチケットへのリンク
-      let featureTicketLink = $(storyBox).find('a')[0]
-      $(featureTicketLink).attr('id', `${idPrefix}story_id_link-${featureid}`)
+      let ticketLink = $(storyBox).find('a')[0]
+      $(ticketLink).attr('id', `${idPrefix}story_id_link-${featureid}`)
 
       // ストーリー名
       let storyName = $(storyBox).find('.subject')[0]
@@ -74,9 +74,9 @@ function parseKanban (callback) {
         headerBox: {
           domId: featureHeaderBox.id
         },
-        featureTicketLink: {
-          value: featureTicketLink.innerText,
-          domId: featureTicketLink.id
+        ticketLink: {
+          value: ticketLink.innerText,
+          domId: ticketLink.id
         }
       }
       data['stories'].push(story)
@@ -137,8 +137,8 @@ function parseKanban (callback) {
         $(taskHeaderBox).attr('id', `${idPrefix}task_header_box-${taskid}`)
 
         // Taskチケットへのリンク
-        let taskTicketLink = $(taskBox).find('a')[0]
-        $(taskTicketLink).attr('id', `${idPrefix}task_id_link-${taskid}`)
+        let ticketLink = $(taskBox).find('a')[0]
+        $(ticketLink).attr('id', `${idPrefix}task_id_link-${taskid}`)
 
         // タスク名
         let taskName = $(taskBox).find('.subject')[0]
@@ -159,9 +159,9 @@ function parseKanban (callback) {
           headerBox: {
             domId: taskHeaderBox.id
           },
-          taskTicketLink: {
-            value: taskTicketLink.innerText,
-            domId: taskTicketLink.id
+          ticketLink: {
+            value: ticketLink.innerText,
+            domId: ticketLink.id
           }
         }
         tasks.push(task)
@@ -202,12 +202,15 @@ function overwriteHeaderBoxCSS (data, css) {
 function createFeatureIdCopyButton (data) {
   // story
   for (let story of data['stories']) {
-    let ticketLink = $(`#${story.featureTicketLink.domId}`)
+    let ticketLink = $(`#${story.ticketLink.domId}`)
 
     // 既にボタンを作成していたら何もしない
-    let next = $(ticketLink).next()[0]
-    if (next.id === `${idPrefix}copyToClipboard`) {
-      continue
+    try {
+      let next = $(ticketLink).next()[0]
+      if (next.id === `${idPrefix}copyToClipboard`) {
+        continue
+      }
+    } catch (error) {
     }
 
     // チケット番号のマージンを削除
@@ -222,6 +225,7 @@ function createFeatureIdCopyButton (data) {
       style="float: right;
             margin:0;
             margin-left: 4px;
+            margin-right: 2px;
             font-size: inherit;
             padding: 0px;
             font-weight: normal;
@@ -230,7 +234,6 @@ function createFeatureIdCopyButton (data) {
             cursor: pointer;
             user-select: none;
             vertical-align: bottom;"
-            line-height: 14px;
       >
       #
       </button>`
@@ -240,63 +243,62 @@ function createFeatureIdCopyButton (data) {
   }
 }
 
-/*
-// IDをクリップボードにコピーするためのボタンを作成する
-function createIdCopyButton () {
-  // 既にボタンを作成していたら、全て削除する
-  let hoges = $('[id=copyIdButton]')
-  hoges.each((i, elem) => {
-    $(elem).remove()
-  })
+// TaskIDをクリップボードにコピーするためのボタンを作成する
+function createTaskIdCopyButton (data) {
+  // task
+  for (let story of data['stories']) {
+    for (let status of story['status']) {
+      for (let task of status['tasks']) {
+        let ticketLink = $(`#${task.ticketLink.domId}`)
 
-  // Taskチケットを全て取得
-  let issues = $('[id^=issue_]')
-  issues.each((i, elem) => {
-    try {
-      // Taskチケットの親の親が「StoryとTask群を含む行」
-      let swimlane = ($(elem).parent().parent())[0]
-      if (swimlane.id === '') {
-        return true
-      }
-      let featureid = swimlane.id.slice(9)
-      let taskid = elem.id.slice(6)
+        // 既にボタンを作成していたら何もしない
+        try {
+          let prev = $(ticketLink).prev()[0]
+          if (prev.id === `${idPrefix}copyToClipboard`) {
+            continue
+          }
+        } catch (error) {
+        }
 
-      // Task IDの右隣に「#」ボタンを作成
-      // これをクリックすると Story ID と Task ID がクリップボードにコピーされる
-      let html =
-        `<button
+        // チケット番号のマージンを削除
+        $(ticketLink).css('margin-left', '0px')
+
+        // ボタンを作成
+        let html =
+          `<button
           type="button"
-          id="copyIdButton"
-          value="#${taskid} #${featureid}"
-          style="display:inline-block;
-                margin:0;
+          id="${idPrefix}copyToClipboard"
+          value="#${task.id.value} #${story.id.value}"
+          style="margin:0;
                 margin-right: 2px;
-                font-size:inherit;
-                padding:0px;
-                font-weight:normal;
-                border-width:0px;
-                border-style:solid;
-                background:transparent;
-                border-radius:0;
-                cursor:pointer;
-                user-select:none;
-                vertical-align:bottom;"
-        >
-        #
-        </button>`
-      $(elem).find('.prevent_edit').before(html.replace(/\r?\n/g, ' '))
-    } catch (error) {
-      console.log(error)
+                font-size: inherit;
+                padding: 0px;
+                font-weight: normal;
+                border-width: 0px;
+                background: transparent;
+                cursor: pointer;
+                user-select: none;
+                vertical-align: bottom;"
+          >
+          #
+          </button>`
+        html = html.replace(/\r?\n/g, ' ')
+        html = html.replace(/\s+/g, ' ')
+        $(ticketLink).before(html)
+      }
     }
-  })
+  }
 }
-*/
 
 // ボタンが押されたら、クリップボードにコピー
 $(document).on('click', `#${idPrefix}copyToClipboard`, (e) => {
   let string = e.target.value
+
+  // Shiftキーが押されていたら、先頭からスペースまでをコピー
+  if (e.shiftKey) {
+    string = string.replace(/ .*$/, '')
+  }
   execCopy(string)
-  console.log(string)
 })
 
 /*
@@ -350,6 +352,7 @@ function createIdTitleButton () {
 }
 */
 
+/*
 // ボタンが押されたら、クリップボードにコピー
 $(document).on('click', '#copyTitleButton', (e) => {
   let string = e.target.value // ノーマル
@@ -357,6 +360,7 @@ $(document).on('click', '#copyTitleButton', (e) => {
   execCopy(string)
   console.log(string)
 })
+*/
 
 /*
 // 子チケット一覧を表示するためのボタンを作成する
@@ -401,6 +405,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })
 
     createFeatureIdCopyButton(data)
+    createTaskIdCopyButton(data)
   })
   /*
   createOpenChildIdList()
