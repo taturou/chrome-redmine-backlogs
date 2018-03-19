@@ -174,7 +174,20 @@ function parseKanban (callback) {
   callback(data)
 }
 
-// ストーリーとタスクのIDとかを表示するdivの背景色を変更する
+// ストーリーのスタイルを変更する
+function overwriteFeatureBoxCSS (data, css) {
+  // story
+  for (let story of data['stories']) {
+    let box = $(`#${story.box.domId}`)[0]
+
+    // overwrite
+    for (let propaty in css) {
+      $(box).css(propaty, css[propaty])
+    }
+  }
+}
+
+// ストーリーとタスクのIDとかを表示するdivのスタイルを変更する
 function overwriteHeaderBoxCSS (data, css) {
   // story
   for (let story of data['stories']) {
@@ -200,8 +213,8 @@ function overwriteHeaderBoxCSS (data, css) {
   }
 }
 
-// ステータスの背景色を変更する
-function overwirteStatusBoxCSS (data, css) {
+// ステータスのスタイルを変更する
+function overwirteStatusBoxCSS (data, cssObj) {
   // story
   for (let story of data['stories']) {
     for (let status in story['status']) {
@@ -209,8 +222,27 @@ function overwirteStatusBoxCSS (data, css) {
       let box = $(`#${statusObj.box.domId}`)[0]
 
       // overwrite
-      for (let propaty in css[status]) {
-        $(box).css(propaty, css[status][propaty])
+      let css = cssObj[status]
+      for (let propaty in css) {
+        $(box).css(propaty, css[propaty])
+      }
+    }
+  }
+}
+
+// タスクのスタイルを変更する
+function overwriteTaskBoxCSS (data, css) {
+  // task
+  for (let story of data['stories']) {
+    for (let status in story['status']) {
+      let statusObj = story['status'][status]
+      for (let task of statusObj['tasks']) {
+        let box = $(`#${task.box.domId}`)
+
+        // overwrite
+        for (let propaty in css) {
+          $(box).css(propaty, css[propaty])
+        }
       }
     }
   }
@@ -422,6 +454,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   console.log('content: called')
 
   parseKanban((data) => {
+    overwriteFeatureBoxCSS(data, {
+      'border': '1px solid gray'
+    })
+
     overwriteHeaderBoxCSS(data, {
       'background-color': 'whilte',
       'opacity': '1'
@@ -434,6 +470,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       fixed: { 'background': '#e6ffeb' },
       closed: { 'background': '#e6f4ff' },
       wontfix: { 'background': '#f2f2f2' }
+    })
+
+    overwriteTaskBoxCSS(data, {
+      'border': '1px solid gray'
     })
 
     createFeatureIdCopyButton(data, (story) => {
