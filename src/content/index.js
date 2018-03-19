@@ -566,7 +566,7 @@ function updateKanban () {
 
     createTaskListOpenLink(data, (story) => {
       return {
-        title: '●',
+        title: '↑',
         link: `/projects/${data.projectId}/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=*&f%5B%5D=parent_id&op%5Bparent_id%5D=%3D&v%5Bparent_id%5D%5B%5D=${story.id.value}&f%5B%5D=&c%5B%5D=status&c%5B%5D=tracker&c%5B%5D=cf_271&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=total_estimated_hours&c%5B%5D=total_spent_hours&group_by=assigned_to&t%5B%5D=estimated_hours&t%5B%5D=spent_hours&t%5B%5D=`
       }
     })
