@@ -173,6 +173,32 @@ function parseKanban (callback) {
   callback(data)
 }
 
+// ストーリーとタスクのIDとかを表示するdivの背景色を変更する
+function overwriteHeaderBoxCSS (data, css) {
+  // story
+  for (let story of data['stories']) {
+    let storyHeaderBox = $(`#${story.headerBox.domId}`)
+
+    // overwrite
+    for (let propaty in css) {
+      $(storyHeaderBox).css(propaty, css[propaty])
+    }
+
+    // task
+    for (let status of story['status']) {
+      for (let task of status['tasks']) {
+        let taskHeaderBox = $(`#${task.headerBox.domId}`)
+
+        // overwrite
+        for (let propaty in css) {
+          $(taskHeaderBox).css(propaty, css[propaty])
+        }
+      }
+    }
+  }
+}
+
+/*
 // IDをクリップボードにコピーするためのボタンを作成する
 function createIdCopyButton () {
   // 既にボタンを作成していたら、全て削除する
@@ -222,6 +248,7 @@ function createIdCopyButton () {
     }
   })
 }
+*/
 
 // ボタンが押されたら、クリップボードにコピー
 $(document).on('click', '#copyIdButton', (e) => {
@@ -231,6 +258,7 @@ $(document).on('click', '#copyIdButton', (e) => {
   console.log(string)
 })
 
+/*
 // タイトルをクリップボードにコピーするためのボタンを作成する
 function createIdTitleButton () {
   // 既にボタンを作成していたら、全て削除する
@@ -279,6 +307,7 @@ function createIdTitleButton () {
     }
   })
 }
+*/
 
 // ボタンが押されたら、クリップボードにコピー
 $(document).on('click', '#copyTitleButton', (e) => {
@@ -288,6 +317,7 @@ $(document).on('click', '#copyTitleButton', (e) => {
   console.log(string)
 })
 
+/*
 // 子チケット一覧を表示するためのボタンを作成する
 function createOpenChildIdList () {
   // 既にボタンを作成していたら、全て削除する
@@ -317,17 +347,23 @@ function createOpenChildIdList () {
     }
   })
 }
+*/
 
 // 拡張機能の popup から呼ばれる
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   console.log('content: called')
 
   parseKanban((data) => {
-    console.log(data)
+    overwriteHeaderBoxCSS(data, {
+      'background-color': 'whilte',
+      'opacity': '1'
+    })
   })
+  /*
   createOpenChildIdList()
   createIdTitleButton()
   createIdCopyButton()
+  */
   sendResponse({
     msg: 'content: called'
   })
