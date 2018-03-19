@@ -199,7 +199,7 @@ function overwriteHeaderBoxCSS (data, css) {
 }
 
 // FeatureIDをクリップボードにコピーするためのボタンを作成する
-function createFeatureIdCopyButton (data) {
+function createFeatureIdCopyButton (data, callback) {
   // story
   for (let story of data['stories']) {
     let ticketLink = $(`#${story.ticketLink.domId}`)
@@ -217,11 +217,12 @@ function createFeatureIdCopyButton (data) {
     $(ticketLink).css('margin-left', '0px')
 
     // ボタンを作成
+    let button = callback(story)
     let html =
       `<button
       type="button"
       id="${idPrefix}copyToClipboard"
-      value="#${story.id.value}"
+      value="${button.text}"
       style="float: right;
             margin:0;
             margin-left: 4px;
@@ -235,7 +236,7 @@ function createFeatureIdCopyButton (data) {
             user-select: none;
             vertical-align: bottom;"
       >
-      #
+      ${button.title}
       </button>`
     html = html.replace(/\r?\n/g, ' ')
     html = html.replace(/\s+/g, ' ')
@@ -244,7 +245,7 @@ function createFeatureIdCopyButton (data) {
 }
 
 // TaskIDをクリップボードにコピーするためのボタンを作成する
-function createTaskIdCopyButton (data) {
+function createTaskIdCopyButton (data, callback) {
   // task
   for (let story of data['stories']) {
     for (let status of story['status']) {
@@ -264,11 +265,12 @@ function createTaskIdCopyButton (data) {
         $(ticketLink).css('margin-left', '0px')
 
         // ボタンを作成
+        let button = callback(story, task)
         let html =
           `<button
           type="button"
           id="${idPrefix}copyToClipboard"
-          value="#${task.id.value} #${story.id.value}"
+          value="${button.text}"
           style="margin:0;
                 margin-right: 2px;
                 font-size: inherit;
@@ -280,7 +282,7 @@ function createTaskIdCopyButton (data) {
                 user-select: none;
                 vertical-align: bottom;"
           >
-          #
+          ${button.title}
           </button>`
         html = html.replace(/\r?\n/g, ' ')
         html = html.replace(/\s+/g, ' ')
@@ -291,7 +293,7 @@ function createTaskIdCopyButton (data) {
 }
 
 // '[プロジェクト名] ストーリー名: タスク名' をクリップボードにコピーするためのボタンを作成する
-function createTaskNameCopyButton (data) {
+function createTaskNameCopyButton (data, callback) {
   // task
   for (let story of data['stories']) {
     for (let status of story['status']) {
@@ -311,11 +313,12 @@ function createTaskNameCopyButton (data) {
         $(ticketLink).css('margin-right', '0px')
 
         // ボタンを作成
+        let button = callback(story, task)
         let html =
           `<button
           type="button"
           id="${idPrefix}copyToClipboard"
-          value="[${data.project_id}] ${story.name.value}: ${task.name.value}"
+          value="${button.text}"
           style="margin:0;
                 margin-left: 2px;
                 font-size: inherit;
@@ -327,7 +330,7 @@ function createTaskNameCopyButton (data) {
                 user-select: none;
                 vertical-align: bottom;"
           >
-          ●
+          ${button.title}
           </button>`
         html = html.replace(/\r?\n/g, ' ')
         html = html.replace(/\s+/g, ' ')
@@ -390,9 +393,26 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       'opacity': '1'
     })
 
-    createFeatureIdCopyButton(data)
-    createTaskIdCopyButton(data)
-    createTaskNameCopyButton(data)
+    createFeatureIdCopyButton(data, (story) => {
+      return {
+        title: '#',
+        text: `#${story.id.value}`
+      }
+    })
+
+    createTaskIdCopyButton(data, (story, task) => {
+      return {
+        title: '#',
+        text: `#${task.id.value} #${story.id.value}`
+      }
+    })
+
+    createTaskNameCopyButton(data, (story, task) => {
+      return {
+        title: '●',
+        text: `[${data.project_id}] ${story.name.value}: ${task.name.value}`
+      }
+    })
   })
 
   sendResponse({
