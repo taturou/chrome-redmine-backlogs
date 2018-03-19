@@ -1,5 +1,8 @@
 import jQuery from 'jquery'
+import lodash from 'lodash'
+
 const $ = jQuery
+const _ = lodash
 
 // 追加するHTMLタグidのプレフィックス
 const idPrefix = '--pjpex-'
@@ -31,7 +34,7 @@ function parseKanban (callback) {
 
   // project id
   let overview = $('#main-menu').find('.overview')
-  data['project_id'] = $(overview).attr('href').substr(10) // delete '/projects/'
+  data['projectId'] = $(overview).attr('href').substr(10) // delete '/projects/'
 
   // story
   data['stories'] = []
@@ -49,7 +52,10 @@ function parseKanban (callback) {
       $(featureHeaderBox).attr('id', `${idPrefix}story_header_box-${featureid}`)
 
       // Featureチケットへのリンク
-      let ticketLink = $(storyBox).find('a')[0]
+      let ticketLink = _.filter($(storyBox).find('a'), (elem) => {
+        let href = $(elem).attr('href')
+        return /^\/issues\//.test(href)
+      })[0]
       $(ticketLink).attr('id', `${idPrefix}story_id_link-${featureid}`)
 
       // ストーリー名
@@ -244,6 +250,52 @@ function createFeatureIdCopyButton (data, callback) {
   }
 }
 
+// Featureの子チケット一覧を表示するためのリンクを作成する
+function createTaskListOpenLink (data, callback) {
+  // story
+  for (let story of data['stories']) {
+    let ticketLink = $(`#${story.ticketLink.domId}`)
+
+    // 既にボタンを作成していたら何もしない
+    try {
+      let prev = $(ticketLink).prev()[0]
+      if (prev.id === `${idPrefix}link`) {
+        continue
+      }
+    } catch (error) {
+    }
+
+    // チケット番号のマージンを削除
+    $(ticketLink).css('margin-right', '0px')
+
+    // ボタンを作成
+    let a = callback(story)
+    let html =
+      `<a
+      id="${idPrefix}link"
+      target="_blank"
+      href="${a.link}"
+      style="float: right;
+            margin:0;
+            margin-left: 2px;
+            margin-right: 0px;
+            font-size: inherit;
+            padding: 0px;
+            font-weight: normal;
+            border-width: 0px;
+            background: transparent;
+            cursor: pointer;
+            user-select: none;
+            vertical-align: bottom;"
+      >
+      ${a.title}
+      </a>`
+    html = html.replace(/\r?\n/g, ' ')
+    html = html.replace(/\s+/g, ' ')
+    $(ticketLink).before(html)
+  }
+}
+
 // TaskIDをクリップボードにコピーするためのボタンを作成する
 function createTaskIdCopyButton (data, callback) {
   // task
@@ -351,38 +403,6 @@ $(document).on('click', `#${idPrefix}copyToClipboard`, (e) => {
   execCopy(string)
 })
 
-/*
-// 子チケット一覧を表示するためのボタンを作成する
-function createOpenChildIdList () {
-  // 既にボタンを作成していたら、全て削除する
-  let hoges = $('[id=openChildIdList]')
-  hoges.each((i, elem) => {
-    $(elem).remove()
-  })
-
-  // Featureチケットを全て取得
-  let swimlanes = $('[id^=swimlane-')
-  swimlanes.each((i, swimlane) => {
-    try {
-      let featureid = swimlane.id.slice(9)
-      let story = $(swimlane).find('.story')
-
-      let html =
-        `<a
-          id="openChildIdList"
-          target="_blank"
-          href="/issues?fv%5Bparent_id%5D%5B%5D=${featureid}&f%5B%5D=&c%5B%5D=status&c%5B%5D=tracker&c%5B%5D=cf_271&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=total_estimated_hours&c%5B%5D=total_spent_hours&group_by=assigned_to&t%5B%5D=estimated_hours&t%5B%5D=spent_hours&t%5B%5D="
-        >
-        ●
-        </a>`
-      $(story).find('a').before(html.replace(/\r?\n/g, ' '))
-    } catch (error) {
-      console.log(error)
-    }
-  })
-}
-*/
-
 // 拡張機能の popup から呼ばれる
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   console.log('content: called')
@@ -400,6 +420,13 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
     })
 
+    createTaskListOpenLink(data, (story) => {
+      return {
+        title: '●',
+        link: `/projects/${data.projectId}/issues?utf8=%E2%9C%93&set_filter=1&f%5B%5D=status_id&op%5Bstatus_id%5D=*&f%5B%5D=parent_id&op%5Bparent_id%5D=%3D&v%5Bparent_id%5D%5B%5D=${story.id.value}&f%5B%5D=&c%5B%5D=status&c%5B%5D=tracker&c%5B%5D=cf_271&c%5B%5D=subject&c%5B%5D=assigned_to&c%5B%5D=total_estimated_hours&c%5B%5D=total_spent_hours&group_by=assigned_to&t%5B%5D=estimated_hours&t%5B%5D=spent_hours&t%5B%5D=`
+      }
+    })
+
     createTaskIdCopyButton(data, (story, task) => {
       return {
         title: '#',
@@ -410,7 +437,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     createTaskNameCopyButton(data, (story, task) => {
       return {
         title: '●',
-        text: `[${data.project_id}] ${story.name.value}: ${task.name.value}`
+        text: `[${data.projectId}] ${story.name.value}: ${task.name.value}`
       }
     })
   })
