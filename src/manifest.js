@@ -2,8 +2,8 @@
  * @see {@link https://developer.chrome.com/extensions/manifest}
  */
 module.exports = {
-  name: 'redmine-backlogs-extension',
-  description: 'A Chrome extension project with Vue.js',
+  name: 'chrome-redmine-backlogs',
+  description: 'A Chrome extension for Redmine with Backlogs',
   author: 'taturou@gmail.com',
   version: '1.0.0',
   icons: {
