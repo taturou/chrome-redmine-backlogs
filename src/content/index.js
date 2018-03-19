@@ -97,39 +97,34 @@ function parseKanban (callback) {
     let columns = $(swimlane).children()
 
     // make object
-    let status = [
-      {
-        status: 'opened',
+    let status = {
+      opened: {
         box: { domId: columns[1].id }
       },
-      {
-        status: 'planned',
+      planned: {
         box: { domId: columns[2].id }
       },
-      {
-        status: 'working',
+      working: {
         box: { domId: columns[3].id }
       },
-      {
-        status: 'fixed',
+      fixed: {
         box: { domId: columns[4].id }
       },
-      {
-        status: 'closed',
+      closed: {
         box: { domId: columns[5].id }
       },
-      {
-        status: 'wontfix',
+      wontfix: {
         box: { domId: columns[6].id }
       }
-    ]
+    }
     story['status'] = status
   }
 
   // task
   for (let story of data['stories']) {
-    for (let status of story['status']) {
-      let box = $(`#${status.box.domId}`)[0]
+    for (let status in story['status']) {
+      let statusObj = story['status'][status]
+      let box = $(`#${statusObj.box.domId}`)[0]
 
       let taskBoxs = $(box).children()
 
@@ -172,7 +167,7 @@ function parseKanban (callback) {
         }
         tasks.push(task)
       }
-      status['tasks'] = tasks
+      statusObj['tasks'] = tasks
     }
   }
 
@@ -191,8 +186,9 @@ function overwriteHeaderBoxCSS (data, css) {
     }
 
     // task
-    for (let status of story['status']) {
-      for (let task of status['tasks']) {
+    for (let status in story['status']) {
+      let statusObj = story['status'][status]
+      for (let task of statusObj['tasks']) {
         let taskHeaderBox = $(`#${task.headerBox.domId}`)
 
         // overwrite
@@ -300,8 +296,9 @@ function createTaskListOpenLink (data, callback) {
 function createTaskIdCopyButton (data, callback) {
   // task
   for (let story of data['stories']) {
-    for (let status of story['status']) {
-      for (let task of status['tasks']) {
+    for (let status in story['status']) {
+      let statusObj = story['status'][status]
+      for (let task of statusObj['tasks']) {
         let ticketLink = $(`#${task.ticketLink.domId}`)
 
         // 既にボタンを作成していたら何もしない
@@ -348,8 +345,9 @@ function createTaskIdCopyButton (data, callback) {
 function createTaskNameCopyButton (data, callback) {
   // task
   for (let story of data['stories']) {
-    for (let status of story['status']) {
-      for (let task of status['tasks']) {
+    for (let status in story['status']) {
+      let statusObj = story['status'][status]
+      for (let task of statusObj['tasks']) {
         let ticketLink = $(`#${task.ticketLink.domId}`)
 
         // 既にボタンを作成していたら何もしない
