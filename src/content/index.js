@@ -290,6 +290,53 @@ function createTaskIdCopyButton (data) {
   }
 }
 
+// '[プロジェクト名] ストーリー名: タスク名' をクリップボードにコピーするためのボタンを作成する
+function createTaskNameCopyButton (data) {
+  // task
+  for (let story of data['stories']) {
+    for (let status of story['status']) {
+      for (let task of status['tasks']) {
+        let ticketLink = $(`#${task.ticketLink.domId}`)
+
+        // 既にボタンを作成していたら何もしない
+        try {
+          let next = $(ticketLink).next()[0]
+          if (next.id === `${idPrefix}copyToClipboard`) {
+            continue
+          }
+        } catch (error) {
+        }
+
+        // チケット番号のマージンを削除
+        $(ticketLink).css('margin-right', '0px')
+
+        // ボタンを作成
+        let html =
+          `<button
+          type="button"
+          id="${idPrefix}copyToClipboard"
+          value="[${data.project_id}] ${story.name.value}: ${task.name.value}"
+          style="margin:0;
+                margin-left: 2px;
+                font-size: inherit;
+                padding: 0px;
+                font-weight: normal;
+                border-width: 0px;
+                background: transparent;
+                cursor: pointer;
+                user-select: none;
+                vertical-align: bottom;"
+          >
+          ●
+          </button>`
+        html = html.replace(/\r?\n/g, ' ')
+        html = html.replace(/\s+/g, ' ')
+        $(ticketLink).after(html)
+      }
+    }
+  }
+}
+
 // ボタンが押されたら、クリップボードにコピー
 $(document).on('click', `#${idPrefix}copyToClipboard`, (e) => {
   let string = e.target.value
@@ -300,67 +347,6 @@ $(document).on('click', `#${idPrefix}copyToClipboard`, (e) => {
   }
   execCopy(string)
 })
-
-/*
-// タイトルをクリップボードにコピーするためのボタンを作成する
-function createIdTitleButton () {
-  // 既にボタンを作成していたら、全て削除する
-  let hoges = $('[id=copyTitleButton]')
-  hoges.each((i, elem) => {
-    $(elem).remove()
-  })
-
-  // Taskチケットを全て取得
-  let issues = $('[id^=issue_]')
-  issues.each((i, elem) => {
-    try {
-      // Taskチケットの親の親が「StoryとTask群を含む行」
-      let swimlane = ($(elem).parent().parent())[0]
-      if (swimlane.id === '') {
-        return true
-      }
-      let story = ($(swimlane).children())[0]
-      let storyname = ($(story).find('.subject'))[0].innerText
-      let taskname = $(elem).find('div[fieldlabel="題名"]')[0].innerText
-
-      // タイトルをコピーするボタンを作成
-      let html =
-        `<button
-          type="button"
-          id="copyTitleButton"
-          value="${storyname}: ${taskname}"
-          style="display:inline-block;
-                margin:0;
-                margin-left: 0.5em;
-                font-size:inherit;
-                padding:0px;
-                font-weight:normal;
-                border-width:0px;
-                border-style:solid;
-                background:transparent;
-                border-radius:0;
-                cursor:pointer;
-                user-select:none;
-                vertical-align:bottom;">
-          ■
-          </button>`
-      $(elem).find('.prevent_edit').after(html.replace(/\r?\n/g, ' '))
-    } catch (error) {
-      console.log(error)
-    }
-  })
-}
-*/
-
-/*
-// ボタンが押されたら、クリップボードにコピー
-$(document).on('click', '#copyTitleButton', (e) => {
-  let string = e.target.value // ノーマル
-  // let string = e.target.parentElement.parentElement.value // 絵文字
-  execCopy(string)
-  console.log(string)
-})
-*/
 
 /*
 // 子チケット一覧を表示するためのボタンを作成する
@@ -406,12 +392,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     createFeatureIdCopyButton(data)
     createTaskIdCopyButton(data)
+    createTaskNameCopyButton(data)
   })
-  /*
-  createOpenChildIdList()
-  createIdTitleButton()
-  createIdCopyButton()
-  */
+
   sendResponse({
     msg: 'content: called'
   })
