@@ -1,14 +1,8 @@
 <template lang="pug">
     div
-      //el-row
-      //  el-col(span="24")
-      //    el-button(size="small" type="primary" @click="tab") New tab
-      //el-row
-      //  el-col(span="24")
-      //   el-button(size="small" type="primary" @click="background") background
       el-row
         el-col(span="24")
-          el-button(size="small" type="primary" @click="content") Update
+          el-button(size="small" type="primary" @click="update") Update
 </template>
 <script>
   export default {
@@ -20,20 +14,10 @@
     },
     mounted () { },
     methods: {
-      tab () {
-        chrome.tabs.create({ url: 'pages/app.html' })
-      },
-      background () {
-        console.log('background: clicked')
-        chrome.runtime.sendMessage({greeting: 'bg-listener'}, (response) => {
-          console.log(response.msg)
-        })
-      },
-      content () {
-        console.log('content: clicked')
+      update () {
+        console.log('update: clicked')
         chrome.tabs.query({active: true}, (tab) => {
-          let tab0 = tab[0]
-          chrome.tabs.sendMessage(tab0.id, {text: ''}, (response) => {
+          chrome.tabs.sendMessage(tab[0].id, {request: 'update'}, (response) => {
             console.log(response.msg)
           })
         })

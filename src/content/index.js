@@ -522,10 +522,8 @@ $(document).on('click', `#${idPrefix}copyToClipboard`, (e) => {
   execCopy(string)
 })
 
-// 拡張機能の popup から呼ばれる
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  console.log('content: called')
-
+// かんばんを書き換える
+function updateKanban () {
   parseKanban((data) => {
     overwriteFeatureBoxCSS(data, {
       'border': '1px solid gray'
@@ -550,7 +548,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })
 
     overwriteTaskBoxCSS(data, {
-      'border': '1px solid gray'
+      'border': '1px solid gray',
+      'margin': '4px'
     })
 
     overwriteProcessKindCSS(data, {
@@ -589,8 +588,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       }
     })
   })
+}
 
-  sendResponse({
-    msg: 'content: called'
-  })
+// 拡張機能の popup から呼ばれる
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.request === 'update') {
+    console.log('update: called')
+    updateKanban()
+    sendResponse({
+      msg: 'update: done'
+    })
+  }
 })

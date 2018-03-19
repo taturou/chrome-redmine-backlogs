@@ -20,7 +20,8 @@ module.exports = {
     'tabs',
     'background',
     'unlimitedStorage',
-    'storage'
+    'storage',
+    'alarms'
   ],
   browser_action: {
     default_title: 'PJP',
