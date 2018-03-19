@@ -48,7 +48,7 @@ function parseKanban (callback) {
       $(storyBox).attr('id', `${idPrefix}story_box-${featureid}`)
 
       // FeatureIDとか表示するdiv
-      let featureHeaderBox = $(storyBox).children()[0]
+      let featureHeaderBox = $(storyBox).find('.id')[0]
       $(featureHeaderBox).attr('id', `${idPrefix}story_header_box-${featureid}`)
 
       // Featureチケットへのリンク
@@ -61,6 +61,10 @@ function parseKanban (callback) {
       // ストーリー名
       let storyName = $(storyBox).find('.subject')[0]
       $(storyName).attr('id', `${idPrefix}story_name-${featureid}`)
+
+      // ストーリーポイント
+      let storyPoints = $(storyBox).find('.story_points')[0]
+      $(storyPoints).attr('id', `${idPrefix}story_points-${featureid}`)
 
       // make object
       let story = {
@@ -83,6 +87,10 @@ function parseKanban (callback) {
         ticketLink: {
           value: ticketLink.innerText,
           domId: ticketLink.id
+        },
+        storyPoints: {
+          value: storyPoints.innerText,
+          domId: storyPoints.id
         }
       }
       data['stories'].push(story)
@@ -145,6 +153,14 @@ function parseKanban (callback) {
         let taskName = $(taskBox).find('.subject')[0]
         $(taskName).attr('id', `${idPrefix}task_name-${taskid}`)
 
+        // 作業区分
+        let processKind = $(taskBox).find('.sagyokubun')[0]
+        $(processKind).attr('id', `${idPrefix}process_kind-${taskid}`)
+
+        // 残り時間
+        let remainingHours = $(taskBox).find('.remaining_hours')[0]
+        $(remainingHours).attr('id', `${idPrefix}remaining_hours-${taskid}`)
+
         // make object
         let task = {
           id: {
@@ -163,6 +179,14 @@ function parseKanban (callback) {
           ticketLink: {
             value: ticketLink.innerText,
             domId: ticketLink.id
+          },
+          processKind: {
+            value: processKind.innerText,
+            domId: processKind.id
+          },
+          remainingHours: {
+            value: remainingHours.innerText,
+            domId: remainingHours.id
           }
         }
         tasks.push(task)
@@ -178,11 +202,11 @@ function parseKanban (callback) {
 function overwriteFeatureBoxCSS (data, css) {
   // story
   for (let story of data['stories']) {
-    let box = $(`#${story.box.domId}`)[0]
+    let elem = $(`#${story.box.domId}`)[0]
 
     // overwrite
     for (let propaty in css) {
-      $(box).css(propaty, css[propaty])
+      $(elem).css(propaty, css[propaty])
     }
   }
 }
@@ -191,24 +215,37 @@ function overwriteFeatureBoxCSS (data, css) {
 function overwriteHeaderBoxCSS (data, css) {
   // story
   for (let story of data['stories']) {
-    let storyHeaderBox = $(`#${story.headerBox.domId}`)
+    let elem = $(`#${story.headerBox.domId}`)
 
     // overwrite
     for (let propaty in css) {
-      $(storyHeaderBox).css(propaty, css[propaty])
+      $(elem).css(propaty, css[propaty])
     }
 
     // task
     for (let status in story['status']) {
       let statusObj = story['status'][status]
       for (let task of statusObj['tasks']) {
-        let taskHeaderBox = $(`#${task.headerBox.domId}`)
+        let elem = $(`#${task.headerBox.domId}`)
 
         // overwrite
         for (let propaty in css) {
-          $(taskHeaderBox).css(propaty, css[propaty])
+          $(elem).css(propaty, css[propaty])
         }
       }
+    }
+  }
+}
+
+// ストーリーポイントのスタイルを変更する
+function overwriteStoryPointsCSS (data, css) {
+  // story
+  for (let story of data['stories']) {
+    let elem = $(`#${story.storyPoints.domId}`)[0]
+
+    // overwrite
+    for (let propaty in css) {
+      $(elem).css(propaty, css[propaty])
     }
   }
 }
@@ -219,12 +256,12 @@ function overwirteStatusBoxCSS (data, cssObj) {
   for (let story of data['stories']) {
     for (let status in story['status']) {
       let statusObj = story['status'][status]
-      let box = $(`#${statusObj.box.domId}`)[0]
+      let elem = $(`#${statusObj.box.domId}`)[0]
 
       // overwrite
       let css = cssObj[status]
       for (let propaty in css) {
-        $(box).css(propaty, css[propaty])
+        $(elem).css(propaty, css[propaty])
       }
     }
   }
@@ -237,11 +274,47 @@ function overwriteTaskBoxCSS (data, css) {
     for (let status in story['status']) {
       let statusObj = story['status'][status]
       for (let task of statusObj['tasks']) {
-        let box = $(`#${task.box.domId}`)
+        let elem = $(`#${task.box.domId}`)
 
         // overwrite
         for (let propaty in css) {
-          $(box).css(propaty, css[propaty])
+          $(elem).css(propaty, css[propaty])
+        }
+      }
+    }
+  }
+}
+
+// 作業区分のスタイルを変更する
+function overwriteProcessKindCSS (data, css) {
+  // task
+  for (let story of data['stories']) {
+    for (let status in story['status']) {
+      let statusObj = story['status'][status]
+      for (let task of statusObj['tasks']) {
+        let elem = $(`#${task.processKind.domId}`)
+
+        // overwrite
+        for (let propaty in css) {
+          $(elem).css(propaty, css[propaty])
+        }
+      }
+    }
+  }
+}
+
+// 残り時間のスタイルを変更する
+function overwriteRemainingHoursCSS (data, css) {
+  // task
+  for (let story of data['stories']) {
+    for (let status in story['status']) {
+      let statusObj = story['status'][status]
+      for (let task of statusObj['tasks']) {
+        let elem = $(`#${task.remainingHours.domId}`)
+
+        // overwrite
+        for (let propaty in css) {
+          $(elem).css(propaty, css[propaty])
         }
       }
     }
@@ -463,6 +536,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       'opacity': '1'
     })
 
+    overwriteStoryPointsCSS(data, {
+      'border': '1px solid gray'
+    })
+
     overwirteStatusBoxCSS(data, {
       opened: {},
       planned: { 'background': '#fff3e6' },
@@ -473,6 +550,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     })
 
     overwriteTaskBoxCSS(data, {
+      'border': '1px solid gray'
+    })
+
+    overwriteProcessKindCSS(data, {
+      'border': '1px solid gray'
+    })
+
+    overwriteRemainingHoursCSS(data, {
       'border': '1px solid gray'
     })
 
