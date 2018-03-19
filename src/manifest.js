@@ -2,9 +2,9 @@
  * @see {@link https://developer.chrome.com/extensions/manifest}
  */
 module.exports = {
-  name: 'pjp-extension',
+  name: 'redmine-backlogs-extension',
   description: 'A Chrome extension project with Vue.js',
-  author: 'h-morishita@esol.co.jp',
+  author: 'taturou@gmail.com',
   version: '1.0.0',
   icons: {
     '16': 'icons/16.png',
@@ -24,7 +24,7 @@ module.exports = {
     'alarms'
   ],
   browser_action: {
-    default_title: 'PJP',
+    default_title: 'Backlogs',
     default_popup: 'pages/popup.html'
   },
   background: {
@@ -39,10 +39,7 @@ module.exports = {
       'js/content.js'
     ],
     run_at: 'document_end',
-    /*
-    matches: ['<all_urls>'],
-    */
-    matches: ['http://thq-server:8001/rb/taskboards/*'],
+    matches: [ 'http://*/rb/taskboards/*', 'https://*/rb/taskboards/*' ],
     all_frames: true
   }],
   manifest_version: 2,

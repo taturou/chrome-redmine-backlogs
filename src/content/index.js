@@ -5,10 +5,7 @@ const $ = jQuery
 const _ = lodash
 
 // 追加するHTMLタグidのプレフィックス
-const idPrefix = '--pjpex-'
-
-// このスクリプトがロードされたときに表示する（デバッグ用）
-console.log('PJP, content-script!')
+const idPrefix = '--kanban-'
 
 // クリップボードに文字列をコピーする
 // https://qiita.com/simiraaaa/items/2e7478d72f365aa48356

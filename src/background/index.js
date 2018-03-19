@@ -1,18 +1,9 @@
-console.log('background!')
-
-chrome.runtime.onMessage.addListener(
-  function (request, sender, sendResponse) {
-    if (request.greeting === 'bg-listener') {
-      console.log('bg-listener: called')
-      sendResponse({msg: 'bg-listener: called'})
-    }
-  }
-)
-
+// アラームを登録
 chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms.create('update', {periodInMinutes: 1})
 })
 
+// アラームトリガで content を呼び出す
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'update') {
     console.log('update: called')
