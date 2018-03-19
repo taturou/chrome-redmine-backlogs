@@ -198,6 +198,48 @@ function overwriteHeaderBoxCSS (data, css) {
   }
 }
 
+// FeatureIDをクリップボードにコピーするためのボタンを作成する
+function createFeatureIdCopyButton (data) {
+  // story
+  for (let story of data['stories']) {
+    let ticketLink = $(`#${story.featureTicketLink.domId}`)
+
+    // 既にボタンを作成していたら何もしない
+    let next = $(ticketLink).next()[0]
+    if (next.id === `${idPrefix}copyToClipboard`) {
+      continue
+    }
+
+    // チケット番号のマージンを削除
+    $(ticketLink).css('margin-left', '0px')
+
+    // ボタンを作成
+    let html =
+      `<button
+      type="button"
+      id="${idPrefix}copyToClipboard"
+      value="#${story.id.value}"
+      style="float: right;
+            margin:0;
+            margin-left: 4px;
+            font-size: inherit;
+            padding: 0px;
+            font-weight: normal;
+            border-width: 0px;
+            background: transparent;
+            cursor: pointer;
+            user-select: none;
+            vertical-align: bottom;"
+            line-height: 14px;
+      >
+      #
+      </button>`
+    html = html.replace(/\r?\n/g, ' ')
+    html = html.replace(/\s+/g, ' ')
+    $(ticketLink).after(html)
+  }
+}
+
 /*
 // IDをクリップボードにコピーするためのボタンを作成する
 function createIdCopyButton () {
@@ -251,9 +293,8 @@ function createIdCopyButton () {
 */
 
 // ボタンが押されたら、クリップボードにコピー
-$(document).on('click', '#copyIdButton', (e) => {
-  let string = e.target.value // ノーマル
-  // let string = e.target.parentElement.parentElement.value // 絵文字
+$(document).on('click', `#${idPrefix}copyToClipboard`, (e) => {
+  let string = e.target.value
   execCopy(string)
   console.log(string)
 })
@@ -358,6 +399,8 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       'background-color': 'whilte',
       'opacity': '1'
     })
+
+    createFeatureIdCopyButton(data)
   })
   /*
   createOpenChildIdList()
