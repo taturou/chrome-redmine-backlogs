@@ -200,6 +200,22 @@ function overwriteHeaderBoxCSS (data, css) {
   }
 }
 
+// ステータスの背景色を変更する
+function overwirteStatusBoxCSS (data, css) {
+  // story
+  for (let story of data['stories']) {
+    for (let status in story['status']) {
+      let statusObj = story['status'][status]
+      let box = $(`#${statusObj.box.domId}`)[0]
+
+      // overwrite
+      for (let propaty in css[status]) {
+        $(box).css(propaty, css[status][propaty])
+      }
+    }
+  }
+}
+
 // FeatureIDをクリップボードにコピーするためのボタンを作成する
 function createFeatureIdCopyButton (data, callback) {
   // story
@@ -409,6 +425,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     overwriteHeaderBoxCSS(data, {
       'background-color': 'whilte',
       'opacity': '1'
+    })
+
+    overwirteStatusBoxCSS(data, {
+      opened: {},
+      planned: { 'background': '#fff3e6' },
+      working: { 'background': '#ffe6e8' },
+      fixed: { 'background': '#e6ffeb' },
+      closed: { 'background': '#e6f4ff' },
+      wontfix: { 'background': '#f2f2f2' }
     })
 
     createFeatureIdCopyButton(data, (story) => {
